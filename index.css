@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  
+  --color-primary: #874c66;
+  --color-primary-hover: #6f3b52;
+  --color-primary-container: #d18ba8;
+  --color-on-primary-container: #59243d;
+  --color-background-soft: #fff8f7;
+  --color-surface-card: #ffffff;
+  --color-text-espresso: #201a1a;
+  --color-text-espresso-muted: #514348;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background-soft);
+    color: var(--color-text-espresso);
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+  }
+}
+
+/* Custom scrollbar matching brand styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #fdf1f0;
+}
+::-webkit-scrollbar-thumb {
+  background: #d5c2c7;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c8c6c3;
+}
+
