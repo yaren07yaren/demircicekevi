@@ -1,0 +1,6 @@
+{
+  "name": "Demir Cicek Evi Gaziantep",
+  "description": "Gaziantep'in premium cicek butigi olan Demir Cicek Evi icin luks sepet, siparis ve odeme tamamlama arayuzu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
