@@ -1,0 +1,29 @@
+{
+  "entities": {
+    "product": {
+      "title": "Product",
+      "description": "A flower bouquet or gift product item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "image": { "type": "string" },
+        "description": { "type": "string" },
+        "details": { "type": "string" },
+        "type": { "type": "string" },
+        "inStock": { "type": "boolean" },
+        "isFeatured": { "type": "boolean" },
+        "subCategory": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "price", "image", "description", "details"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "product",
+      "description": "Collection of all products including flower bouquets and gifts"
+    }
+  }
+}

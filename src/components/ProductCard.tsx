@@ -60,30 +60,30 @@ export default function ProductCard({
         </button>
       </div>
 
-      <div className="p-5 flex-grow flex flex-col justify-between">
+      <div className="p-3 sm:p-5 flex-grow flex flex-col justify-between">
         <div>
-          <span className="text-[10px] font-bold tracking-widest text-[#874c66] uppercase block mb-1">
+          <span className="text-[9px] sm:text-[10px] font-bold tracking-wider sm:tracking-widest text-[#874c66] uppercase block mb-0.5 sm:mb-1">
             {flower.category}
           </span>
-          <h3 className="font-serif text-lg font-medium text-[#201a1a] mb-2 leading-snug group-hover:text-[#874c66] transition-colors">
+          <h3 className="font-serif text-sm sm:text-lg font-medium text-[#201a1a] mb-1 sm:mb-2 leading-snug group-hover:text-[#874c66] transition-colors line-clamp-1 sm:line-clamp-none">
             {flower.name}
           </h3>
-          <p className="text-[#514348] text-xs line-clamp-2 leading-relaxed mb-4">
+          <p className="text-[#514348] text-[11px] sm:text-xs line-clamp-2 leading-snug sm:leading-relaxed mb-3 sm:mb-4">
             {flower.description}
           </p>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-[#ebe0df]/40 gap-2 mt-auto">
-          <span className="text-base font-bold text-[#874c66] tracking-tight">
+        <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-[#ebe0df]/40 gap-1.5 sm:gap-2 mt-auto">
+          <span className="text-sm sm:text-base font-bold text-[#874c66] tracking-tight whitespace-nowrap">
             {flower.price.toLocaleString("tr-TR")} ₺
           </span>
           
           <button 
             onClick={() => onAddToCart(flower)}
-            className="flex items-center gap-1.5 bg-[#874c66] hover:bg-[#6f3b52] text-white font-sans text-xs font-semibold px-3 py-2 rounded-lg transition-transform duration-205 hover:scale-[1.02] active:scale-95 cursor-pointer"
+            className="flex items-center justify-center gap-1 bg-[#874c66] hover:bg-[#6f3b52] text-white font-sans text-[11px] sm:text-xs font-semibold px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-transform duration-205 hover:scale-[1.02] active:scale-95 cursor-pointer shrink-0"
           >
-            <Plus size={14} />
-            Ekle
+            <Plus size={12} className="sm:w-3.5 sm:h-3.5" />
+            <span>Ekle</span>
           </button>
         </div>
       </div>

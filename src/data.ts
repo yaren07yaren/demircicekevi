@@ -33,7 +33,7 @@ import imgHD010 from "./assets/images/kirmizi_kalp_kutu_png_1780694962786.png";
 import imgHD011 from "./assets/images/pembe_kalp_kutu_png_1780694974913.png";
 import imgHD012 from "./assets/images/ask_kare_kutu_png_1780694989205.png";
 
-export const FLOWER_PRODUCTS: FlowerItem[] = [
+const RAW_FLOWER_PRODUCTS: FlowerItem[] = [
   // BOUQUETS row 1 (Ayıcıklı ve Renkli Özel Tasarımlar)
   {
     id: "1",
@@ -278,6 +278,11 @@ export const FLOWER_PRODUCTS: FlowerItem[] = [
     type: "gift"
   }
 ];
+
+export const FLOWER_PRODUCTS: FlowerItem[] = RAW_FLOWER_PRODUCTS.map((item, index) => ({
+  ...item,
+  price: 400 + (index % 3) * 50
+}));
 
 export const GA_TIME_SLOTS = [
   "09:00 - 12:00",

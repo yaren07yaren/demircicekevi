@@ -42,6 +42,7 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [adminTab, setAdminTab] = useState<"bouquets" | "gifts">("bouquets");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Add / Edit Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -371,31 +372,95 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
 
   // 2. MAIN ADMINISTRATION DASHBOARD RENDER
   return (
-    <div className="min-h-screen bg-[#fff8f7] flex font-sans text-[#201a1a]">
+    <div className="min-h-screen bg-[#fff8f7] flex flex-col lg:flex-row font-sans text-[#201a1a] relative">
       
-      {/* 2.1 Sidebar Left Navigation Rail (matching mockups 2 & 3) */}
-      <aside className="w-80 min-h-screen bg-white border-r border-[#ebe0df]/70 flex flex-col justify-between shrink-0 p-6">
+      {/* Mobile Sticky Navigation Header with menu symbol / toggle */}
+      <div className="lg:hidden flex items-center justify-between px-4 py-3.5 bg-white border-b border-[#ebe0df]/70 sticky top-0 z-[100] shadow-2xs">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="w-10 h-10 rounded-xl bg-[#874c66]/10 flex items-center justify-center text-[#874c66] hover:bg-[#874c66]/15 transition-colors focus:outline-none cursor-pointer animate-pulse"
+            title="Menüyü Göster"
+          >
+            <Grid size={20} />
+          </button>
+          <div className="text-left">
+            <h2 className="font-serif text-base font-bold text-[#201a1a] leading-none mb-0.5">
+              Yönetim
+            </h2>
+            <p className="text-[9px] uppercase font-bold tracking-widest text-[#874c66] leading-none">
+              Demir Çiçek Evi
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={onClose}
+            className="text-[#874c66] font-semibold text-xs tracking-wider uppercase transition-colors hover:text-[#514348]"
+            title="Siteye Dön"
+          >
+            Dön
+          </button>
+          <button
+            onClick={handleLogout}
+            className="text-red-500 p-2 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+            title="Çıkış Yap"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Sidebar Overlay backdrop on Mobile */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="lg:hidden fixed inset-0 bg-black/40 z-[200] backdrop-blur-3xs"
+        />
+      )}
+      
+      {/* 2.1 Sidebar Left Navigation Rail (matching mockups 2 & 3 with collapsible responsive behaviour) */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-[250] w-80 bg-white border-r border-[#ebe0df]/70 flex flex-col justify-between shrink-0 p-6 
+        transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:min-h-screen
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `}>
         
         <div className="space-y-12">
-          {/* Logo Brand Header */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#874c66]/10 flex items-center justify-center text-[#874c66]">
-              <Grid size={20} />
+          {/* Logo Brand Header & Mobile Close button */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#874c66]/10 flex items-center justify-center text-[#874c66]">
+                <Grid size={20} />
+              </div>
+              <div className="text-left">
+                <h2 className="font-serif text-lg font-bold text-[#201a1a] leading-none mb-1">
+                  Yönetim
+                </h2>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-[#874c66] leading-none">
+                  Demir Çiçek Evi
+                </p>
+              </div>
             </div>
-            <div className="text-left">
-              <h2 className="font-serif text-lg font-bold text-[#201a1a] leading-none mb-1">
-                Yönetim
-              </h2>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-[#874c66] leading-none">
-                Demir Çiçek Evi
-              </p>
-            </div>
+
+            {/* Mobile close button inside sidebar */}
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
+              title="Kapat"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           {/* Sidebar Menu Items */}
           <nav className="space-y-2">
             <button 
-              onClick={() => setAdminTab("bouquets")}
+              onClick={() => {
+                setAdminTab("bouquets");
+                setIsSidebarOpen(false); // Auto close menu on mobile tab select
+              }}
               className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-xs tracking-wider uppercase text-left transition-colors pointer-events-auto cursor-pointer ${
                 adminTab === "bouquets" 
                   ? "bg-[#fcf0f2] text-[#874c66]" 
@@ -407,7 +472,10 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
             </button>
 
             <button 
-              onClick={() => setAdminTab("gifts")}
+              onClick={() => {
+                setAdminTab("gifts");
+                setIsSidebarOpen(false); // Auto close menu on mobile tab select
+              }}
               className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-xs tracking-wider uppercase text-left transition-colors pointer-events-auto cursor-pointer ${
                 adminTab === "gifts" 
                   ? "bg-[#fcf0f2] text-[#874c66]" 
@@ -423,14 +491,20 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
         {/* Sidebar Footer Controls */}
         <div className="space-y-3 pt-6 border-t border-[#ebe0df]/50">
           <button 
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              setIsSidebarOpen(false);
+            }}
             className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-[#874c66] hover:bg-[#fff8f7] rounded-xl font-medium text-xs tracking-wide text-left transition-colors pointer-events-auto cursor-pointer"
           >
             <ArrowLeft size={16} />
             <span>Siteye Dön</span>
           </button>
           <button 
-            onClick={handleLogout}
+            onClick={() => {
+              handleLogout();
+              setIsSidebarOpen(false);
+            }}
             className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:text-red-800 hover:bg-red-50/50 rounded-xl font-medium text-xs tracking-wide text-left transition-colors pointer-events-auto cursor-pointer"
           >
             <LogOut size={16} />
@@ -440,7 +514,7 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
       </aside>
 
       {/* 2.2 Right Page Body Workspace */}
-      <main className="flex-grow p-8 lg:p-12 overflow-y-auto max-w-[1440px] mx-auto text-left space-y-10">
+      <main className="flex-grow p-4 sm:p-8 lg:p-12 overflow-y-auto max-w-[1440px] mx-auto text-left space-y-6 sm:space-y-10 w-full overflow-x-hidden">
         
         {/* Workspace Title bar Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -547,11 +621,11 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
             <table className="w-full text-left border-collapse font-sans">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100 font-semibold text-[10px] tracking-wider text-gray-400 uppercase">
-                  <th className="py-4.5 px-6 font-bold">Ürün</th>
-                  <th className="py-4.5 px-6 font-bold">Kategori</th>
-                  <th className="py-4.5 px-6 font-bold">Fiyat</th>
-                  <th className="py-4.5 px-6 font-bold">Durum</th>
-                  <th className="py-4.5 px-6 font-bold text-right pr-12">İşlemler</th>
+                  <th className="py-3 px-3 sm:px-6 font-bold">Ürün</th>
+                  <th className="py-3 px-3 sm:px-6 font-bold">Kategori</th>
+                  <th className="py-3 px-3 sm:px-6 font-bold">Fiyat</th>
+                  <th className="py-3 px-3 sm:px-6 font-bold">Durum</th>
+                  <th className="py-3 px-3 sm:px-6 font-bold text-right pr-4 sm:pr-12">İşlemler</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-xs font-medium text-gray-800">
@@ -576,8 +650,8 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
                       <tr key={item.id} className="hover:bg-[#fff8f7]/40 transition-colors group">
                         
                         {/* 1. ÜRÜN */}
-                        <td className="py-4 px-6 flex items-center gap-4">
-                          <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#fbf5f5] shrink-0 border border-gray-100 shadow-3xs">
+                        <td className="py-3 px-3 sm:px-6 flex items-center gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden bg-[#fbf5f5] shrink-0 border border-gray-100 shadow-3xs">
                             <img 
                               src={item.image} 
                               alt={item.name} 
@@ -596,53 +670,53 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
                         </td>
 
                         {/* 2. KATEGORİ */}
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-3 sm:px-6">
                           <span className="text-gray-500 font-medium">
                             {getSubCategory(item)}
                           </span>
                         </td>
 
                         {/* 3. FİYAT */}
-                        <td className="py-4 px-6 font-serif text-xs font-bold text-[#201a1a]">
+                        <td className="py-3 px-3 sm:px-6 font-serif text-xs font-bold text-[#201a1a] whitespace-nowrap">
                           ₺{item.price.toLocaleString("tr-TR")}
                         </td>
 
                         {/* 4. DURUM & BADGES */}
-                        <td className="py-4 px-6 space-y-1">
+                        <td className="py-3 px-3 sm:px-6 space-y-1">
                           {item.inStock !== false ? (
-                            <div className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                            <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                               <span>✓</span>
                               <span>Stokta</span>
                             </div>
                           ) : (
-                            <div className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-500 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                            <div className="inline-flex items-center gap-1 bg-gray-100 text-gray-500 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                               <span>✗</span>
                               <span>Tükendi</span>
                             </div>
                           )}
                           {isItemFeatured && (
-                            <div className="text-[10px] text-[#874c66] font-medium block pl-1">
+                            <div className="text-[9px] text-[#874c66] font-medium block pl-1">
                               Öne Çıkan
                             </div>
                           )}
                         </td>
 
                         {/* 5. İŞLEMLER (edit & delete buttons) matches mockup hover state */}
-                        <td className="py-4 px-6 text-right pr-12">
-                          <div className="flex justify-end gap-2.5 opacity-100 sm:opacity-100 transition-opacity">
+                        <td className="py-3 px-3 sm:px-6 text-right pr-4 sm:pr-12">
+                          <div className="flex justify-end gap-1.5 sm:gap-2.5 opacity-100 transition-opacity">
                             <button 
                               onClick={() => handleOpenEditModal(item)}
                               title="Düzenle"
-                              className="p-2 border border-gray-100 text-gray-500 hover:text-[#874c66] hover:bg-[#fff8f7]/30 hover:border-[#ebe0df]/80 transition-all rounded-lg cursor-pointer"
+                              className="p-1.5 sm:p-2 border border-gray-100 text-gray-500 hover:text-[#874c66] hover:bg-[#fff8f7]/30 hover:border-[#ebe0df]/80 transition-all rounded-lg cursor-pointer"
                             >
-                              <Edit size={14} />
+                              <Edit size={13} />
                             </button>
                             <button 
                               onClick={() => handleDeleteProduct(item)}
                               title="Sil"
-                              className="p-2 border border-gray-100 text-gray-500 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all rounded-lg cursor-pointer"
+                              className="p-1.5 sm:p-2 border border-gray-100 text-gray-500 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all rounded-lg cursor-pointer"
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={13} />
                             </button>
                           </div>
                         </td>

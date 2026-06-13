@@ -35,6 +35,15 @@ import BankTransferInfo from "./components/BankTransferInfo";
 import SuccessModal from "./components/SuccessModal";
 import AdminPanel from "./components/AdminPanel";
 
+// Firebase and Firestore integration imports
+import { db } from "./firebase";
+import { collection, onSnapshot } from "firebase/firestore";
+import { 
+  getProductsFromFirestore, 
+  saveProductToFirestore, 
+  deleteProductFromFirestore 
+} from "./lib/firestoreService";
+
 // Predefined Quick Cart Messages templates
 const CARD_TEMPLATES = [
   "Seni her geçen gün daha çok seviyorum. Mutlu yıllarımız olsun!",
@@ -48,7 +57,7 @@ export default function App() {
   // State variables
   const [view, setView] = useState<"store" | "admin">("store");
 
-  // Load dynamic products from localStorage or fall back to pre-seeded list
+  // Load dynamic products from localStorage first as a quick offline cache/fallback
   const [products, setProducts] = useState<FlowerItem[]>(() => {
     const saved = localStorage.getItem("demir_cicek_products");
     if (saved) {
@@ -61,9 +70,101 @@ export default function App() {
     return FLOWER_PRODUCTS;
   });
 
-  const handleUpdateProducts = (newProducts: FlowerItem[]) => {
+  // Sync products in real-time from Firestore database
+  useEffect(() => {
+    const path = "products";
+    
+    // Seed Firestore if Empty & load initial values
+    async function initProducts() {
+      try {
+        const dbProducts = await getProductsFromFirestore(FLOWER_PRODUCTS);
+        
+        const oldPrices = [890, 950, 980, 790, 1350, 680, 850, 880, 1450, 750, 640, 1100, 1950, 820, 920, 860, 1150, 1050];
+        const needsMigration = dbProducts.some(p => oldPrices.includes(p.price));
+        
+        if (needsMigration) {
+          console.log("Migrating older product prices to 400, 450, 500 sequence...");
+          const updatedProducts = dbProducts.map((p, index) => {
+            if (oldPrices.includes(p.price)) {
+              return {
+                ...p,
+                price: 400 + (index % 3) * 50
+              };
+            }
+            return p;
+          });
+          
+          setProducts(updatedProducts);
+          localStorage.setItem("demir_cicek_products", JSON.stringify(updatedProducts));
+          
+          // Write updated ones back to Firestore
+          for (const p of updatedProducts) {
+            await saveProductToFirestore(p);
+          }
+        } else {
+          setProducts(dbProducts);
+        }
+      } catch (err) {
+        console.error("Error during Firestore initialization:", err);
+      }
+    }
+    initProducts();
+
+    // Register active live snapshot listener
+    const unsubscribe = onSnapshot(
+      collection(db, path),
+      (snapshot) => {
+        const liveProducts: FlowerItem[] = [];
+        snapshot.forEach((docSnap) => {
+          liveProducts.push(docSnap.data() as FlowerItem);
+        });
+        
+        if (liveProducts.length > 0) {
+          liveProducts.sort((a, b) => {
+            const idA = Number(a.id) || 0;
+            const idB = Number(b.id) || 0;
+            if (idA && idB) return idA - idB;
+            return a.id.localeCompare(b.id);
+          });
+          setProducts(liveProducts);
+          localStorage.setItem("demir_cicek_products", JSON.stringify(liveProducts));
+        }
+      },
+      (error) => {
+        console.error("Firestore live update streaming error:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleUpdateProducts = async (newProducts: FlowerItem[]) => {
+    // 1. Immediately update UI state for maximum client responsiveness
     setProducts(newProducts);
     localStorage.setItem("demir_cicek_products", JSON.stringify(newProducts));
+
+    // 2. Compute difference to update Firestore securely
+    try {
+      const currentIds = new Map(products.map(p => [p.id, p]));
+      const newIds = new Map(newProducts.map(p => [p.id, p]));
+      
+      // Determine deletes
+      for (const currentProduct of products) {
+        if (!newIds.has(currentProduct.id)) {
+          await deleteProductFromFirestore(currentProduct.id);
+        }
+      }
+      
+      // Determine creations or modifications
+      for (const newProduct of newProducts) {
+        const currentProd = currentIds.get(newProduct.id);
+        if (!currentProd || JSON.stringify(currentProd) !== JSON.stringify(newProduct)) {
+          await saveProductToFirestore(newProduct);
+        }
+      }
+    } catch (err) {
+      console.error("Discrepancy writing updates to Firestore:", err);
+    }
   };
 
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -479,7 +580,7 @@ export default function App() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
               {products.filter((flower) => {
                 const itemType = flower.type || "bouquet";
                 return itemType === activeCategory;
@@ -501,7 +602,7 @@ export default function App() {
         </section>
 
         {/* Integrated Column Layout Checkout Flow */}
-        <section className="px-6 md:px-10 py-16 max-w-[1440px] mx-auto">
+        <section id="siparis" className="px-6 md:px-10 py-16 max-w-[1440px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             {/* Left Box: My Cart List & Delivery Info (8/12 Columns) */}
@@ -815,9 +916,9 @@ export default function App() {
         subtotal={subtotal}
         onProceedToCheckout={() => {
           setIsCartOpen(false);
-          handleScrollToId("buketler");
+          handleScrollToId("siparis");
           setTimeout(() => {
-            const checkoutHeading = document.getElementById("buketler");
+            const checkoutHeading = document.getElementById("siparis");
             if (checkoutHeading) checkoutHeading.scrollIntoView({ behavior: "smooth" });
           }, 350);
         }}
