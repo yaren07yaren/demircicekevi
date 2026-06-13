@@ -33,10 +33,13 @@ export default function ProductCard({
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-[#f7ebeb]">
         <img 
-          src={flower.image} 
+          src={flower.image || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover"} 
           alt={flower.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           referrerPolicy="no-referrer"
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover";
+          }}
         />
         
 

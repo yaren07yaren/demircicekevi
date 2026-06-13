@@ -653,10 +653,13 @@ export default function AdminPanel({ products, onUpdateProducts, onClose }: Admi
                         <td className="py-3 px-3 sm:px-6 flex items-center gap-3 sm:gap-4">
                           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden bg-[#fbf5f5] shrink-0 border border-gray-100 shadow-3xs">
                             <img 
-                              src={item.image} 
+                              src={item.image || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover"} 
                               alt={item.name} 
                               className="w-full h-full object-cover"
                               referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                e.currentTarget.src = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover";
+                              }}
                             />
                           </div>
                           <div>

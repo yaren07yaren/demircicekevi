@@ -54,6 +54,53 @@ const CARD_TEMPLATES = [
 ];
 
 export default function App() {
+  // Helper to ensure default flower items use the compiled/bundled hashed image assets
+  const withStaticImages = (items: FlowerItem[]): FlowerItem[] => {
+    const getCoreImageKey = (img: any): string => {
+      if (typeof img !== "string") return "";
+      // Extract filename or core part without extensions or hashes (e.g., "zarif_melodi_1780694081316")
+      const base = img.split("/").pop() || img;
+      const withoutExt = base.split(".")[0] || base;
+      const clean = withoutExt.split("-")[0] || withoutExt;
+      return clean.toLowerCase().trim();
+    };
+
+    const cleanName = (str: string) => str.trim().toLowerCase()
+      .replace(/ı/g, "i").replace(/İ/g, "i")
+      .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s")
+      .replace(/ö/g, "o").replace(/ç/g, "c");
+
+    return items.map(item => {
+      // 1. Try to match by ID
+      let defaultItem = FLOWER_PRODUCTS.find(p => String(p.id).trim() === String(item.id).trim());
+
+      // 2. Try to match by unique core filename (highly robust for default assets)
+      if (!defaultItem && item.image) {
+        const itemImageKey = getCoreImageKey(item.image);
+        if (itemImageKey && itemImageKey.length > 5) { // Ensure it is a valid filename part
+          defaultItem = FLOWER_PRODUCTS.find(p => {
+            const pImageKey = getCoreImageKey(p.image);
+            return pImageKey && (pImageKey.includes(itemImageKey) || itemImageKey.includes(pImageKey));
+          });
+        }
+      }
+
+      // 3. Try to match by Category
+      if (!defaultItem && item.category) {
+        const itemCat = String(item.category).trim().toUpperCase();
+        defaultItem = FLOWER_PRODUCTS.find(p => p.category && String(p.category).trim().toUpperCase() === itemCat);
+      }
+
+      // 4. Try to match by Name (with clean Turkish chars fallback)
+      if (!defaultItem && item.name) {
+        const itemClean = cleanName(item.name);
+        defaultItem = FLOWER_PRODUCTS.find(p => p.name && cleanName(p.name) === itemClean);
+      }
+
+      return defaultItem ? { ...item, image: defaultItem.image } : item;
+    });
+  };
+
   // State variables
   const [view, setView] = useState<"store" | "admin">("store");
 
@@ -62,7 +109,8 @@ export default function App() {
     const saved = localStorage.getItem("demir_cicek_products");
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved) as FlowerItem[];
+        return withStaticImages(parsed);
       } catch (err) {
         return FLOWER_PRODUCTS;
       }
@@ -94,15 +142,16 @@ export default function App() {
             return p;
           });
           
-          setProducts(updatedProducts);
-          localStorage.setItem("demir_cicek_products", JSON.stringify(updatedProducts));
+          const updatedWithImages = withStaticImages(updatedProducts);
+          setProducts(updatedWithImages);
+          localStorage.setItem("demir_cicek_products", JSON.stringify(updatedWithImages));
           
           // Write updated ones back to Firestore
           for (const p of updatedProducts) {
             await saveProductToFirestore(p);
           }
         } else {
-          setProducts(dbProducts);
+          setProducts(withStaticImages(dbProducts));
         }
       } catch (err) {
         console.error("Error during Firestore initialization:", err);
@@ -126,8 +175,9 @@ export default function App() {
             if (idA && idB) return idA - idB;
             return a.id.localeCompare(b.id);
           });
-          setProducts(liveProducts);
-          localStorage.setItem("demir_cicek_products", JSON.stringify(liveProducts));
+          const liveWithImages = withStaticImages(liveProducts);
+          setProducts(liveWithImages);
+          localStorage.setItem("demir_cicek_products", JSON.stringify(liveWithImages));
         }
       },
       (error) => {
@@ -631,10 +681,13 @@ export default function App() {
                           {/* Image */}
                           <div className="w-24 h-28 rounded-xl overflow-hidden bg-[#f7ebeb] shrink-0 border border-[#ebe0df]/40 shadow-2xs">
                             <img 
-                              src={item.flower.image} 
+                              src={item.flower.image || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover"} 
                               alt={item.flower.name}
                               className="w-full h-full object-cover"
                               referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                e.currentTarget.src = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover";
+                              }}
                             />
                           </div>
                           
@@ -964,10 +1017,13 @@ export default function App() {
               >
                 <div className="relative h-64 bg-slate-100">
                   <img 
-                    src={selectedFlowerDetails.image} 
+                    src={selectedFlowerDetails.image || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover"} 
                     alt={selectedFlowerDetails.name}
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover";
+                    }}
                   />
                   <button 
                     onClick={() => setSelectedFlowerDetails(null)}

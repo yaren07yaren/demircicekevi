@@ -90,10 +90,13 @@ export default function CartDrawer({
                   >
                     <div className="w-20 h-24 rounded-lg overflow-hidden bg-[#f7ebeb] flex-shrink-0 border border-[#ebe0df]/30 shadow-2xs">
                       <img 
-                        src={item.flower.image} 
+                        src={item.flower.image || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover"} 
                         alt={item.flower.name}
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover";
+                        }}
                       />
                     </div>
                     

@@ -92,9 +92,12 @@ export default function SuccessModal({
                       <div key={item.flower.id} className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-[#ebe0df]/30">
                         <div className="flex items-center gap-2">
                           <img 
-                            src={item.flower.image} 
+                            src={item.flower.image || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover"} 
                             alt={item.flower.name} 
                             className="w-10 h-12 object-cover rounded-md border"
+                            onError={(e) => {
+                              e.currentTarget.src = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=cover";
+                            }}
                           />
                           <div>
                             <p className="font-semibold text-[#201a1a]">{item.flower.name}</p>
